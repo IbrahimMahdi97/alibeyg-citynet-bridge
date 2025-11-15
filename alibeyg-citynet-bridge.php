@@ -105,9 +105,9 @@ function abg_cn_get_token() {
 }
 
 /* =========================
-   PROXY CALL
+   PROXY CALL (with retry logic)
    ========================= */
-function abg_cn_request($method, $path, $payload = []) {
+function abg_cn_request($method, $path, $payload = [], $custom_timeout = null) {
   $allowed = [
     'flights/search',
     'flights/airports/suggest',
@@ -127,10 +127,13 @@ function abg_cn_request($method, $path, $payload = []) {
     if ($t) $headers['Authorization'] = 'Bearer ' . $t;
   }
 
+  // Increase timeout for flight searches - they can take longer
+  $timeout = $custom_timeout ?? ($path === 'flights/search' ? 60 : 25);
+
   $args = [
     'method'  => (strtoupper($method) === 'GET' ? 'GET' : 'POST'),
     'headers' => $headers,
-    'timeout' => 25,
+    'timeout' => $timeout,
   ];
 
   if ($args['method'] === 'GET') {
@@ -140,12 +143,53 @@ function abg_cn_request($method, $path, $payload = []) {
     $args['body'] = wp_json_encode($payload);
   }
 
-  $resp = wp_remote_request($url, $args);
-  if (is_wp_error($resp)) return $resp;
+  // Retry logic with exponential backoff (up to 3 attempts)
+  $max_retries = 3;
+  $retry_delay = 2; // seconds
 
-  $code = wp_remote_retrieve_response_code($resp);
-  $body = json_decode(wp_remote_retrieve_body($resp), true);
-  return ['status' => $code, 'data' => $body];
+  for ($attempt = 1; $attempt <= $max_retries; $attempt++) {
+    $resp = wp_remote_request($url, $args);
+
+    if (!is_wp_error($resp)) {
+      $code = wp_remote_retrieve_response_code($resp);
+      $body = json_decode(wp_remote_retrieve_body($resp), true);
+
+      // Log successful response
+      error_log(sprintf(
+        '[Alibeyg Citynet] Success on attempt %d for %s: HTTP %d',
+        $attempt,
+        $path,
+        $code
+      ));
+
+      return ['status' => $code, 'data' => $body];
+    }
+
+    // Check if it's a timeout error
+    $error_message = $resp->get_error_message();
+    $is_timeout = (strpos($error_message, 'timed out') !== false ||
+                   strpos($error_message, 'cURL error 28') !== false);
+
+    // Log the error
+    error_log(sprintf(
+      '[Alibeyg Citynet] Attempt %d/%d failed for %s: %s',
+      $attempt,
+      $max_retries,
+      $path,
+      $error_message
+    ));
+
+    // If this is the last attempt or not a timeout error, return the error
+    if ($attempt === $max_retries || !$is_timeout) {
+      return $resp;
+    }
+
+    // Wait before retrying (exponential backoff)
+    sleep($retry_delay);
+    $retry_delay *= 2; // Double the delay for next retry
+  }
+
+  return $resp;
 }
 
 /* =========================
@@ -161,6 +205,52 @@ add_action('rest_api_init', function () {
       if (!is_array($payload)) $payload = [];
       $result = abg_cn_request($method, $path, $payload);
       if (is_wp_error($result)) return $result;
+      return rest_ensure_response($result);
+    },
+    'permission_callback' => '__return_true',
+  ]);
+
+  // Direct flight search endpoint for easier API usage
+  register_rest_route('alibeyg/v1', '/flight-search', [
+    'methods'  => 'POST',
+    'callback' => function (WP_REST_Request $r) {
+      // Get the payload directly from the request body
+      $payload = $r->get_json_params();
+
+      if (empty($payload)) {
+        return new WP_Error(
+          'empty_payload',
+          'Flight search payload is required.',
+          ['status' => 400]
+        );
+      }
+
+      // Validate required fields
+      $required_fields = ['OriginDestinationInformations', 'TravelerInfoSummary'];
+      foreach ($required_fields as $field) {
+        if (empty($payload[$field])) {
+          return new WP_Error(
+            'missing_field',
+            sprintf('Required field "%s" is missing.', $field),
+            ['status' => 400]
+          );
+        }
+      }
+
+      // Log the incoming request for debugging
+      error_log('[Alibeyg Citynet] Flight search request received: ' .
+                wp_json_encode(['payload_keys' => array_keys($payload)]));
+
+      // Call the Citynet API with increased timeout and retry logic
+      $result = abg_cn_request('POST', 'flights/search', $payload);
+
+      if (is_wp_error($result)) {
+        // Return detailed error information
+        error_log('[Alibeyg Citynet] Flight search failed: ' . $result->get_error_message());
+        return $result;
+      }
+
+      error_log('[Alibeyg Citynet] Flight search completed successfully');
       return rest_ensure_response($result);
     },
     'permission_callback' => '__return_true',
