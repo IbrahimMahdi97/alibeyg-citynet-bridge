@@ -36,6 +36,7 @@ class ABG_Citynet_REST_Controller {
      */
     public function register_routes() {
         add_action('rest_api_init', array($this, 'register_proxy_route'));
+        add_action('rest_api_init', array($this, 'register_flight_search_route'));
         add_action('rest_api_init', array($this, 'register_places_route'));
     }
 
@@ -46,6 +47,17 @@ class ABG_Citynet_REST_Controller {
         register_rest_route('alibeyg/v1', '/proxy', array(
             'methods'             => 'POST',
             'callback'            => array($this, 'handle_proxy_request'),
+            'permission_callback' => '__return_true',
+        ));
+    }
+
+    /**
+     * Register dedicated flight search route
+     */
+    public function register_flight_search_route() {
+        register_rest_route('alibeyg/v1', '/flight-search', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'handle_flight_search_request'),
             'permission_callback' => '__return_true',
         ));
     }
@@ -82,6 +94,53 @@ class ABG_Citynet_REST_Controller {
             return $result;
         }
 
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Handle dedicated flight search request
+     *
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response|WP_Error Response
+     */
+    public function handle_flight_search_request($request) {
+        // Get the payload directly from the request body
+        $payload = $request->get_json_params();
+
+        if (empty($payload)) {
+            return new WP_Error(
+                'empty_payload',
+                'Flight search payload is required.',
+                array('status' => 400)
+            );
+        }
+
+        // Validate required fields
+        $required_fields = array('OriginDestinationInformations', 'TravelerInfoSummary');
+        foreach ($required_fields as $field) {
+            if (empty($payload[$field])) {
+                return new WP_Error(
+                    'missing_field',
+                    sprintf('Required field "%s" is missing.', $field),
+                    array('status' => 400)
+                );
+            }
+        }
+
+        // Log the incoming request for debugging
+        error_log('[Alibeyg Citynet] Flight search request received: ' .
+                  wp_json_encode(array('payload_keys' => array_keys($payload))));
+
+        // Call the Citynet API with increased timeout and retry logic
+        $result = $this->api_client->request('POST', 'flights/search', $payload);
+
+        if (is_wp_error($result)) {
+            // Return detailed error information
+            error_log('[Alibeyg Citynet] Flight search failed: ' . $result->get_error_message());
+            return $result;
+        }
+
+        error_log('[Alibeyg Citynet] Flight search completed successfully');
         return rest_ensure_response($result);
     }
 

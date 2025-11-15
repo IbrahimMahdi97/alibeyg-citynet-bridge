@@ -103,14 +103,15 @@ class ABG_Citynet_API_Client {
     }
 
     /**
-     * Make API request
+     * Make API request with retry logic and dynamic timeout
      *
      * @param string $method HTTP method (GET or POST)
      * @param string $path API endpoint path
      * @param array  $payload Request payload
+     * @param int    $custom_timeout Optional custom timeout in seconds
      * @return array|WP_Error Response data or error
      */
-    public function request($method, $path, $payload = array()) {
+    public function request($method, $path, $payload = array(), $custom_timeout = null) {
         // Validate allowed paths
         $allowed = array(
             'flights/search',
@@ -136,11 +137,14 @@ class ABG_Citynet_API_Client {
             }
         }
 
+        // Increase timeout for flight searches - they can take longer
+        $timeout = $custom_timeout !== null ? $custom_timeout : ($path === 'flights/search' ? 60 : 25);
+
         // Build request arguments
         $args = array(
             'method'  => (strtoupper($method) === 'GET' ? 'GET' : 'POST'),
             'headers' => $headers,
-            'timeout' => 25,
+            'timeout' => $timeout,
         );
 
         // Build URL
@@ -151,19 +155,56 @@ class ABG_Citynet_API_Client {
             $args['body'] = wp_json_encode($payload);
         }
 
-        // Make request
-        $resp = wp_remote_request($url, $args);
+        // Retry logic with exponential backoff (up to 3 attempts)
+        $max_retries = 3;
+        $retry_delay = 2; // seconds
 
-        if (is_wp_error($resp)) {
-            return $resp;
+        for ($attempt = 1; $attempt <= $max_retries; $attempt++) {
+            // Make request
+            $resp = wp_remote_request($url, $args);
+
+            if (!is_wp_error($resp)) {
+                $code = wp_remote_retrieve_response_code($resp);
+                $body = json_decode(wp_remote_retrieve_body($resp), true);
+
+                // Log successful response
+                error_log(sprintf(
+                    '[Alibeyg Citynet] Success on attempt %d for %s: HTTP %d',
+                    $attempt,
+                    $path,
+                    $code
+                ));
+
+                return array(
+                    'status' => $code,
+                    'data'   => $body,
+                );
+            }
+
+            // Check if it's a timeout error
+            $error_message = $resp->get_error_message();
+            $is_timeout = (strpos($error_message, 'timed out') !== false ||
+                          strpos($error_message, 'cURL error 28') !== false);
+
+            // Log the error
+            error_log(sprintf(
+                '[Alibeyg Citynet] Attempt %d/%d failed for %s: %s',
+                $attempt,
+                $max_retries,
+                $path,
+                $error_message
+            ));
+
+            // If this is the last attempt or not a timeout error, return the error
+            if ($attempt === $max_retries || !$is_timeout) {
+                return $resp;
+            }
+
+            // Wait before retrying (exponential backoff)
+            sleep($retry_delay);
+            $retry_delay *= 2; // Double the delay for next retry
         }
 
-        $code = wp_remote_retrieve_response_code($resp);
-        $body = json_decode(wp_remote_retrieve_body($resp), true);
-
-        return array(
-            'status' => $code,
-            'data'   => $body,
-        );
+        return $resp;
     }
 }
