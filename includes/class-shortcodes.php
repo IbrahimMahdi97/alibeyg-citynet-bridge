@@ -45,6 +45,7 @@ class ABG_Citynet_Shortcodes {
      */
     public function register() {
         add_shortcode('alibeyg_travel_widget', array($this, 'render_travel_widget'));
+        add_shortcode('alibeyg_flight_results', array($this, 'render_flight_results'));
     }
 
     /**
@@ -79,6 +80,47 @@ class ABG_Citynet_Shortcodes {
     }
 
     /**
+     * Render flight results shortcode
+     *
+     * @param array $atts Shortcode attributes
+     * @return string Results HTML
+     */
+    public function render_flight_results($atts) {
+        // Enqueue the flight results CSS
+        wp_enqueue_style(
+            'abg-citynet-flight-results',
+            $this->plugin_url . '/assets/css/flight-results.css',
+            array(),
+            '0.5.1'
+        );
+
+        // Enqueue the flight results script
+        wp_enqueue_script(
+            'abg-citynet-flight-results',
+            $this->plugin_url . '/assets/js/flight-results.js',
+            array(),
+            '0.5.1',
+            true
+        );
+
+        ob_start();
+        ?>
+        <div class="alibeyg-flight-results-container">
+            <!-- Search parameters will be displayed here -->
+            <div id="flight-search-params"></div>
+
+            <!-- Flight results will be displayed here -->
+            <div id="flight-results">
+                <div class="loading-state">
+                    <p>Initializing search...</p>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
      * Enqueue assets
      */
     public function enqueue_assets() {
@@ -91,7 +133,7 @@ class ABG_Citynet_Shortcodes {
             'abg-citynet-widget',
             $this->plugin_url . '/assets/css/travel-widget.css',
             array(),
-            '0.5.0'
+            '0.5.1'
         );
 
         // Enqueue JavaScript
@@ -99,7 +141,7 @@ class ABG_Citynet_Shortcodes {
             'abg-citynet-widget',
             $this->plugin_url . '/assets/js/travel-widget.js',
             array(),
-            '0.5.0',
+            '0.5.1',
             true
         );
 
