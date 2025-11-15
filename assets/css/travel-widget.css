@@ -1,0 +1,578 @@
+/**
+ * Travel Widget Styles
+ * Alibeyg Citynet Bridge Plugin
+ *
+ * This file contains all the styles for the travel booking widget
+ * Supports: Flights, Hotels, and Visa booking forms
+ */
+
+/* =========================
+   Base Styles
+   ========================= */
+#adivaha-wrapper {
+  padding: 8px;
+  position: relative;
+}
+
+#adivaha-wrapper .travel-widget-container,
+#adivaha-wrapper .travel-widget-container * {
+  box-sizing: border-box;
+}
+
+#adivaha-wrapper .travel-widget-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.1);
+  overflow: visible;
+}
+
+/* =========================
+   Tabs
+   ========================= */
+#adivaha-wrapper .tw-tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+#adivaha-wrapper .tw-tab {
+  flex: 1;
+  padding: 16px 24px;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all .3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-bottom: 4px solid transparent;
+}
+
+#adivaha-wrapper .tw-tab:hover {
+  background: #f3f4f6;
+}
+
+#adivaha-wrapper .tw-tab.active {
+  background: var(--primary-color, #B8011F);
+  color: #fff;
+  border-bottom-color: var(--primary-color, #B8011F);
+}
+
+#adivaha-wrapper .tw-tab-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* =========================
+   Content & Panels
+   ========================= */
+#adivaha-wrapper .tw-content {
+  padding: 24px;
+  position: relative;
+  overflow: visible;
+}
+
+#adivaha-wrapper .tw-tab-panel {
+  display: none;
+}
+
+#adivaha-wrapper .tw-tab-panel.active {
+  display: block;
+}
+
+/* =========================
+   Form Elements
+   ========================= */
+#adivaha-wrapper .tw-trip-type {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+#adivaha-wrapper .tw-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+#adivaha-wrapper .tw-radio-label input[type=radio] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary-color, #B8011F);
+  cursor: pointer;
+}
+
+#adivaha-wrapper .tw-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  #adivaha-wrapper .tw-form-row.horizontal {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  #adivaha-wrapper .tw-form-row.horizontal .tw-field-wide {
+    grid-column: span 2;
+  }
+
+  #adivaha-wrapper .tw-form-row.hotel-horizontal {
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  }
+}
+
+#adivaha-wrapper .tw-field {
+  position: relative;
+}
+
+#adivaha-wrapper .tw-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+#adivaha-wrapper .tw-input-wrapper {
+  position: relative;
+}
+
+#adivaha-wrapper .tw-input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+#adivaha-wrapper .tw-input,
+#adivaha-wrapper .tw-select {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all .2s;
+  background: #fff;
+}
+
+#adivaha-wrapper .tw-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
+
+#adivaha-wrapper .tw-input.no-icon,
+#adivaha-wrapper .tw-select.no-icon {
+  padding-left: 12px;
+}
+
+#adivaha-wrapper .tw-input:focus,
+#adivaha-wrapper .tw-select:focus {
+  outline: none;
+  border-color: var(--primary-color, #B8011F);
+  box-shadow: 0 0 0 3px rgba(184, 1, 31, .1);
+}
+
+#adivaha-wrapper .tw-input[readonly] {
+  cursor: pointer;
+  background: #fff;
+}
+
+/* =========================
+   Buttons
+   ========================= */
+#adivaha-wrapper .tw-search-btn {
+  width: 100%;
+  padding: 16px 24px;
+  background: var(--primary-color, #B8011F);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(184, 1, 31, .3);
+}
+
+#adivaha-wrapper .tw-search-btn:hover {
+  background: var(--primary-hover, #9a0119);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(184, 1, 31, .4);
+}
+
+#adivaha-wrapper .tw-search-btn:active {
+  transform: translateY(0);
+}
+
+#adivaha-wrapper .tw-search-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================
+   Passenger Dropdown
+   ========================= */
+#adivaha-wrapper .tw-passenger-field {
+  position: relative;
+}
+
+#adivaha-wrapper .tw-passenger-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(39, 38, 44, .25);
+  width: 320px;
+  z-index: 9999;
+  padding: 20px;
+}
+
+#adivaha-wrapper .tw-passenger-dropdown.show {
+  display: block;
+}
+
+#adivaha-wrapper .tw-passenger-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+#adivaha-wrapper .tw-passenger-row:last-of-type {
+  border-bottom: none;
+}
+
+#adivaha-wrapper .tw-passenger-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+
+#adivaha-wrapper .tw-passenger-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+#adivaha-wrapper .tw-passenger-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+  color: #6b7280;
+}
+
+#adivaha-wrapper .tw-passenger-btn:hover {
+  border-color: var(--primary-color, #B8011F);
+  color: var(--primary-color, #B8011F);
+}
+
+#adivaha-wrapper .tw-passenger-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+#adivaha-wrapper .tw-passenger-count {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  min-width: 20px;
+  text-align: center;
+}
+
+#adivaha-wrapper .tw-travel-class {
+  padding-top: 20px;
+  margin-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+#adivaha-wrapper .tw-radio-options {
+  margin-top: 12px;
+}
+
+#adivaha-wrapper .tw-radio-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#adivaha-wrapper .tw-radio-option input[type=radio] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-color, #B8011F);
+  cursor: pointer;
+}
+
+#adivaha-wrapper .tw-passenger-footer {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
+}
+
+#adivaha-wrapper .tw-done-btn {
+  width: 100%;
+  padding: 12px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+#adivaha-wrapper .tw-done-btn:hover {
+  background: #333;
+}
+
+/* =========================
+   Additional Services
+   ========================= */
+#adivaha-wrapper .tw-services {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+}
+
+#adivaha-wrapper .tw-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+#adivaha-wrapper .tw-checkbox-label input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-color, #B8011F);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* =========================
+   Country Selector
+   ========================= */
+#adivaha-wrapper .tw-country-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0,0,0,.12);
+  max-height: 300px;
+  overflow: hidden;
+  z-index: 9998;
+  flex-direction: column;
+}
+
+#adivaha-wrapper .tw-country-dropdown.show {
+  display: flex;
+}
+
+#adivaha-wrapper .tw-country-search {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+#adivaha-wrapper .tw-country-search input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+#adivaha-wrapper .tw-country-search input:focus {
+  outline: none;
+  border-color: var(--primary-color, #B8011F);
+}
+
+#adivaha-wrapper .tw-country-list {
+  overflow-y: auto;
+  max-height: 240px;
+}
+
+#adivaha-wrapper .tw-country-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+#adivaha-wrapper .tw-country-item:hover {
+  background: #f3f4f6;
+}
+
+#adivaha-wrapper .tw-country-item.no-results {
+  color: #9ca3af;
+  cursor: default;
+  text-align: center;
+}
+
+/* =========================
+   Person Dropdown (Visa)
+   ========================= */
+#adivaha-wrapper .tw-person-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(39,38,44,.25);
+  width: 300px;
+  z-index: 9999;
+  padding: 20px;
+}
+
+#adivaha-wrapper .tw-person-dropdown.show {
+  display: block;
+}
+
+/* =========================
+   Autocomplete
+   ========================= */
+#adivaha-wrapper .tw-suggest {
+  position: relative;
+}
+
+#adivaha-wrapper .tw-suggest-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0,0,0,.12);
+  max-height: 280px;
+  overflow: auto;
+  z-index: 9998;
+}
+
+#adivaha-wrapper .tw-suggest-item {
+  padding: .55rem .65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#adivaha-wrapper .tw-suggest-item:hover {
+  background: #f3f4f6;
+}
+
+#adivaha-wrapper .tw-code {
+  font-weight: 700;
+  opacity: .9;
+  margin-inline-start: .6rem;
+}
+
+/* =========================
+   Footer
+   ========================= */
+#adivaha-wrapper .tw-footer {
+  background: #f9fafb;
+  padding: 12px 24px;
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* =========================
+   Utilities
+   ========================= */
+#adivaha-wrapper .tw-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+#adivaha-wrapper .animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* =========================
+   Responsive
+   ========================= */
+@media (max-width: 767px) {
+  #adivaha-wrapper .tw-content {
+    padding: 16px;
+  }
+
+  #adivaha-wrapper .tw-tab {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  #adivaha-wrapper .tw-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  #adivaha-wrapper .tw-passenger-dropdown {
+    width: 280px;
+    right: 0;
+    left: auto;
+  }
+}
