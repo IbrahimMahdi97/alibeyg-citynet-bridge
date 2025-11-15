@@ -47,8 +47,9 @@
       const paramsStr = sessionStorage.getItem('flightSearchParams');
 
       if (!payloadStr) {
-        console.error('[Alibeyg Flight Results] No flight search payload found in sessionStorage');
-        this.showError('No search parameters found. Please search again.');
+        console.log('[Alibeyg Flight Results] No flight search payload found - other plugins may handle search');
+        // Don't show error - the citynet plugin might handle this
+        this.hideLoading();
         return;
       }
 
@@ -107,11 +108,12 @@
 
         } catch (e) {
           console.error('[Alibeyg Flight Results] Error parsing URL payload:', e);
-          this.showError('Invalid search parameters. Please search again.');
+          // Don't show error - let other plugins handle it
+          this.hideLoading();
         }
       } else {
-        console.log('[Alibeyg Flight Results] No URL parameters found');
-        this.showNoSearch();
+        console.log('[Alibeyg Flight Results] No URL parameters found - other plugins may handle search');
+        this.hideLoading();
       }
     },
 
@@ -211,6 +213,19 @@
     },
 
     /**
+     * Hide loading state
+     */
+    hideLoading: function() {
+      const container = document.getElementById('flight-results');
+      if (container) {
+        const loadingState = container.querySelector('.loading-state');
+        if (loadingState) {
+          loadingState.remove();
+        }
+      }
+    },
+
+    /**
      * Display flight results
      */
     displayResults: function(data) {
@@ -222,6 +237,16 @@
       });
       window.dispatchEvent(event);
 
+      // Also make data available globally for other plugins
+      window.alibeyg_flight_data = data;
+
+      // Check if citynet plugin wants to handle display
+      if (window.citynetHandleResults && typeof window.citynetHandleResults === 'function') {
+        console.log('[Alibeyg Flight Results] Passing data to citynet plugin');
+        window.citynetHandleResults(data);
+        return;
+      }
+
       // You can also update a container directly
       const container = document.getElementById('flight-results');
       if (container) {
@@ -229,7 +254,8 @@
         container.innerHTML = `
           <div class="results-container">
             <p class="results-info">Results loaded successfully!</p>
-            <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow: auto;">
+            <p>Data is now available for the citynet plugin to display.</p>
+            <pre style="background: #f5f5f5; padding: 15px; border-radius: 5px; overflow: auto; max-height: 400px;">
               ${JSON.stringify(data, null, 2)}
             </pre>
           </div>
@@ -258,12 +284,8 @@
     showNoSearch: function() {
       const container = document.getElementById('flight-results');
       if (container) {
-        container.innerHTML = `
-          <div class="no-search-state">
-            <p>No search parameters found. Please perform a new search.</p>
-            <a href="/" class="btn-search">Search Flights</a>
-          </div>
-        `;
+        // Just hide loading, don't show error - citynet plugin might handle it
+        this.hideLoading();
       }
     }
   };

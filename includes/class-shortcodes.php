@@ -86,6 +86,10 @@ class ABG_Citynet_Shortcodes {
      * @return string Results HTML
      */
     public function render_flight_results($atts) {
+        $atts = shortcode_atts(array(
+            'mode' => 'full',  // 'full', 'params-only', or 'silent'
+        ), $atts, 'alibeyg_flight_results');
+
         // Enqueue the flight results CSS
         wp_enqueue_style(
             'abg-citynet-flight-results',
@@ -104,6 +108,26 @@ class ABG_Citynet_Shortcodes {
         );
 
         ob_start();
+
+        // Silent mode: only fetch data, don't display anything
+        if ($atts['mode'] === 'silent') {
+            ?>
+            <!-- Alibeyg Flight Results (Silent Mode) -->
+            <?php
+            return ob_get_clean();
+        }
+
+        // Params-only mode: only show search parameters
+        if ($atts['mode'] === 'params-only') {
+            ?>
+            <div class="alibeyg-flight-results-container">
+                <div id="flight-search-params"></div>
+            </div>
+            <?php
+            return ob_get_clean();
+        }
+
+        // Full mode (default): show everything
         ?>
         <div class="alibeyg-flight-results-container">
             <!-- Search parameters will be displayed here -->
