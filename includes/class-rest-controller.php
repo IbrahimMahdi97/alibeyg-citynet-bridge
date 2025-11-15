@@ -38,6 +38,7 @@ class ABG_Citynet_REST_Controller {
         add_action('rest_api_init', array($this, 'register_proxy_route'));
         add_action('rest_api_init', array($this, 'register_flight_search_route'));
         add_action('rest_api_init', array($this, 'register_places_route'));
+        add_action('rest_api_init', array($this, 'register_version_route'));
     }
 
     /**
@@ -69,6 +70,17 @@ class ABG_Citynet_REST_Controller {
         register_rest_route('alibeyg/v1', '/places', array(
             'methods'             => 'GET',
             'callback'            => array($this, 'handle_places_request'),
+            'permission_callback' => '__return_true',
+        ));
+    }
+
+    /**
+     * Register version check route
+     */
+    public function register_version_route() {
+        register_rest_route('alibeyg/v1', '/version', array(
+            'methods'             => 'GET',
+            'callback'            => array($this, 'handle_version_request'),
             'permission_callback' => '__return_true',
         ));
     }
@@ -182,5 +194,26 @@ class ABG_Citynet_REST_Controller {
         }
 
         return rest_ensure_response($data);
+    }
+
+    /**
+     * Handle version check request
+     *
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response
+     */
+    public function handle_version_request($request) {
+        return rest_ensure_response(array(
+            'plugin_version' => defined('ABG_CITYNET_VERSION') ? ABG_CITYNET_VERSION : 'unknown',
+            'api_base' => defined('CN_API_BASE') ? CN_API_BASE : 'not defined',
+            'flight_search_timeout' => '60 seconds',
+            'retry_enabled' => true,
+            'max_retries' => 3,
+            'plugin_loaded' => true,
+            'php_version' => phpversion(),
+            'wordpress_version' => get_bloginfo('version'),
+            'timestamp' => current_time('mysql'),
+            'status' => 'Plugin loaded successfully with v0.5.1 updates',
+        ));
     }
 }
