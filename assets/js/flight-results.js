@@ -20,6 +20,18 @@
   window.AlibetgFlightResults = {
 
     /**
+     * Get cookie value by name
+     */
+    getCookie: function(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) {
+        return parts.pop().split(';').shift();
+      }
+      return null;
+    },
+
+    /**
      * Initialize the flight search on page load
      */
     init: function() {
@@ -126,11 +138,25 @@
       console.log('[Alibeyg Flight Results] Calling API:', apiUrl);
       console.log('[Alibeyg Flight Results] Payload:', JSON.stringify(payload, null, 2));
 
+      // Get auth token from cookie
+      const authToken = this.getCookie('auth_token');
+
+      // Build headers
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+
+      // Add Authorization header if token exists
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+        console.log('[Alibeyg Flight Results] Auth token found, adding to request');
+      } else {
+        console.warn('[Alibeyg Flight Results] No auth_token cookie found');
+      }
+
       fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: headers,
         body: JSON.stringify(payload)
       })
       .then(response => {

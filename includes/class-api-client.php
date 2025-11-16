@@ -109,9 +109,10 @@ class ABG_Citynet_API_Client {
      * @param string $path API endpoint path
      * @param array  $payload Request payload
      * @param int    $custom_timeout Optional custom timeout in seconds
+     * @param string $auth_token Optional authentication token from client
      * @return array|WP_Error Response data or error
      */
-    public function request($method, $path, $payload = array(), $custom_timeout = null) {
+    public function request($method, $path, $payload = array(), $custom_timeout = null, $auth_token = null) {
         // Validate allowed paths
         $allowed = array(
             'flights/search',
@@ -128,12 +129,23 @@ class ABG_Citynet_API_Client {
         // Build headers
         $headers = array('Content-Type' => 'application/json');
 
-        if ($this->api_key) {
+        // Use provided auth token first, then fall back to configured credentials
+        if ($auth_token) {
+            // Use token provided by client (from cookie)
+            $headers['Authorization'] = 'Bearer ' . $auth_token;
+            error_log('[Alibeyg Citynet] Using auth token from client request');
+        } elseif ($this->api_key) {
+            // Use API key from configuration
             $headers['Authorization'] = 'Bearer ' . $this->api_key;
+            error_log('[Alibeyg Citynet] Using API key from configuration');
         } else {
+            // Get token via username/password authentication
             $token = $this->get_token();
             if ($token) {
                 $headers['Authorization'] = 'Bearer ' . $token;
+                error_log('[Alibeyg Citynet] Using token from username/password auth');
+            } else {
+                error_log('[Alibeyg Citynet] WARNING: No authentication token available');
             }
         }
 

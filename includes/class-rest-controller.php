@@ -139,12 +139,21 @@ class ABG_Citynet_REST_Controller {
             }
         }
 
+        // Get authorization token from request header if available
+        $auth_header = $request->get_header('authorization');
+        $auth_token = null;
+
+        if ($auth_header && strpos($auth_header, 'Bearer ') === 0) {
+            $auth_token = substr($auth_header, 7); // Remove 'Bearer ' prefix
+            error_log('[Alibeyg Citynet] Auth token received from client');
+        }
+
         // Log the incoming request for debugging
         error_log('[Alibeyg Citynet] Flight search request received: ' .
                   wp_json_encode(array('payload_keys' => array_keys($payload))));
 
         // Call the Citynet API with increased timeout and retry logic
-        $result = $this->api_client->request('POST', 'flights/search', $payload);
+        $result = $this->api_client->request('POST', 'flights/search', $payload, null, $auth_token);
 
         if (is_wp_error($result)) {
             // Return detailed error information
