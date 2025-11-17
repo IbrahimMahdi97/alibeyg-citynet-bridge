@@ -462,11 +462,12 @@
         'first': 'First'
       };
 
-      // Build passenger array
-      var passengers = [];
-      if (pax.adults > 0) passengers.push({"Code": "ADT", "Quantity": pax.adults});
-      if (pax.children > 0) passengers.push({"Code": "CHD", "Quantity": pax.children});
-      if (pax.infants > 0) passengers.push({"Code": "INF", "Quantity": pax.infants});
+      // Build passenger array - API requires exactly 3 items (ADT, CHD, INF)
+      var passengers = [
+        {"Code": "ADT", "Quantity": pax.adults},
+        {"Code": "CHD", "Quantity": pax.children},
+        {"Code": "INF", "Quantity": pax.infants}
+      ];
 
       // Build origin-destination array
       var originDest = [{
@@ -504,7 +505,7 @@
 
       // Prepare search payload in exact API format
       var payload = {
-        "Lang": (document.documentElement.lang || "EN").toUpperCase(),
+        "Lang": "FA",
         "TravelPreference": {
           "CabinPref": {
             "Cabin": cabinMap[fclass] || "Economy"
