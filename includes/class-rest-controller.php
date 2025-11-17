@@ -36,7 +36,9 @@ class ABG_Citynet_REST_Controller {
      */
     public function register_routes() {
         add_action('rest_api_init', array($this, 'register_proxy_route'));
+        add_action('rest_api_init', array($this, 'register_flight_search_route'));
         add_action('rest_api_init', array($this, 'register_places_route'));
+        add_action('rest_api_init', array($this, 'register_version_route'));
     }
 
     /**
@@ -51,12 +53,34 @@ class ABG_Citynet_REST_Controller {
     }
 
     /**
+     * Register dedicated flight search route
+     */
+    public function register_flight_search_route() {
+        register_rest_route('alibeyg/v1', '/flight-search', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'handle_flight_search_request'),
+            'permission_callback' => '__return_true',
+        ));
+    }
+
+    /**
      * Register places autocomplete route
      */
     public function register_places_route() {
         register_rest_route('alibeyg/v1', '/places', array(
             'methods'             => 'GET',
             'callback'            => array($this, 'handle_places_request'),
+            'permission_callback' => '__return_true',
+        ));
+    }
+
+    /**
+     * Register version check route
+     */
+    public function register_version_route() {
+        register_rest_route('alibeyg/v1', '/version', array(
+            'methods'             => 'GET',
+            'callback'            => array($this, 'handle_version_request'),
             'permission_callback' => '__return_true',
         ));
     }
@@ -82,6 +106,62 @@ class ABG_Citynet_REST_Controller {
             return $result;
         }
 
+        return rest_ensure_response($result);
+    }
+
+    /**
+     * Handle dedicated flight search request
+     *
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response|WP_Error Response
+     */
+    public function handle_flight_search_request($request) {
+        // Get the payload directly from the request body
+        $payload = $request->get_json_params();
+
+        if (empty($payload)) {
+            return new WP_Error(
+                'empty_payload',
+                'Flight search payload is required.',
+                array('status' => 400)
+            );
+        }
+
+        // Validate required fields
+        $required_fields = array('OriginDestinationInformations', 'TravelerInfoSummary');
+        foreach ($required_fields as $field) {
+            if (empty($payload[$field])) {
+                return new WP_Error(
+                    'missing_field',
+                    sprintf('Required field "%s" is missing.', $field),
+                    array('status' => 400)
+                );
+            }
+        }
+
+        // Get authorization token from request header if available
+        $auth_header = $request->get_header('authorization');
+        $auth_token = null;
+
+        if ($auth_header && strpos($auth_header, 'Bearer ') === 0) {
+            $auth_token = substr($auth_header, 7); // Remove 'Bearer ' prefix
+            error_log('[Alibeyg Citynet] Auth token received from client');
+        }
+
+        // Log the incoming request for debugging
+        error_log('[Alibeyg Citynet] Flight search request received: ' .
+                  wp_json_encode(array('payload_keys' => array_keys($payload))));
+
+        // Call the Citynet API with increased timeout and retry logic
+        $result = $this->api_client->request('POST', 'flights/search', $payload, null, $auth_token);
+
+        if (is_wp_error($result)) {
+            // Return detailed error information
+            error_log('[Alibeyg Citynet] Flight search failed: ' . $result->get_error_message());
+            return $result;
+        }
+
+        error_log('[Alibeyg Citynet] Flight search completed successfully');
         return rest_ensure_response($result);
     }
 
@@ -123,5 +203,26 @@ class ABG_Citynet_REST_Controller {
         }
 
         return rest_ensure_response($data);
+    }
+
+    /**
+     * Handle version check request
+     *
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response Response
+     */
+    public function handle_version_request($request) {
+        return rest_ensure_response(array(
+            'plugin_version' => defined('ABG_CITYNET_VERSION') ? ABG_CITYNET_VERSION : 'unknown',
+            'api_base' => defined('CN_API_BASE') ? CN_API_BASE : 'not defined',
+            'flight_search_timeout' => '60 seconds',
+            'retry_enabled' => true,
+            'max_retries' => 3,
+            'plugin_loaded' => true,
+            'php_version' => phpversion(),
+            'wordpress_version' => get_bloginfo('version'),
+            'timestamp' => current_time('mysql'),
+            'status' => 'Plugin loaded successfully with v0.5.1 updates',
+        ));
     }
 }

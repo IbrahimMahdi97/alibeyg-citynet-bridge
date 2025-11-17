@@ -35,15 +35,15 @@ class ABG_Citynet_I18n {
      * @var array
      */
     private $translatable_strings = array(
-        'Flights', 'Hotels', 'Visa', 'Round Trip', 'One Way', 'Multi City',
+        'Flights', 'Hotels', 'CIP', 'Round Trip', 'One Way', 'Multi City',
         'From', 'To', 'Depart', 'Return', 'Passengers', 'Class',
         'Economy', 'Premium Economy', 'Business', 'First Class', 'Search Flights',
         'Destination', 'Check-in', 'Check-out', 'Rooms', 'Guests', 'Search Hotels',
-        'City or Airport', 'City, Hotel, Place', 'Powered by Travel Booking Engine',
+        'City or Airport', 'City, Hotel, Place',
         'Please fill in all required fields', 'Please select a return date',
         'Adults', 'Children', 'Infants', 'Travel Class', 'Done',
-        'Passenger', 'Passengers', 'CIP', 'Travel Insurance',
-        'Destination Country', 'Travel Duration', 'Search Visa',
+        'Passenger', 'Passengers', 'Travel Insurance',
+        'Destination Country', 'Travel Duration', 'Search CIP',
         'Search country...', 'Select destination country', 'Persons', 'Person',
         'Days', 'No results'
     );

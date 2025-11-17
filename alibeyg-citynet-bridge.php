@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Alibeyg Citynet Bridge
  * Description: Server-side proxy to Citynet API (Flights/Hotels/Visa) + modern travel widget with autocomplete & i18n.
- * Version: 0.5.0
+ * Version: 0.5.2
  * Author: Alibeyg
  * Text Domain: alibeyg-citynet
  *
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
 /**
  * Define plugin constants
  */
-define('ABG_CITYNET_VERSION', '0.5.0');
+define('ABG_CITYNET_VERSION', '0.5.2');
 define('ABG_CITYNET_PLUGIN_FILE', __FILE__);
 define('ABG_CITYNET_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('ABG_CITYNET_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -27,7 +27,7 @@ define('ABG_CITYNET_PLUGIN_URL', plugin_dir_url(__FILE__));
  * These can be overridden in wp-config.php
  */
 if (!defined('CN_API_BASE')) {
-    define('CN_API_BASE', 'https://citynet.ir/');
+    define('CN_API_BASE', 'https://171.22.24.69/api/v1.0/');
 }
 if (!defined('CN_ORG_ID')) {
     define('CN_ORG_ID', 12345);

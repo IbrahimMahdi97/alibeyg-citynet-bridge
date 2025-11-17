@@ -462,11 +462,12 @@
         'first': 'First'
       };
 
-      // Build passenger array
-      var passengers = [];
-      if (pax.adults > 0) passengers.push({"Code": "ADT", "Quantity": pax.adults});
-      if (pax.children > 0) passengers.push({"Code": "CHD", "Quantity": pax.children});
-      if (pax.infants > 0) passengers.push({"Code": "INF", "Quantity": pax.infants});
+      // Build passenger array - API requires exactly 3 items (ADT, CHD, INF)
+      var passengers = [
+        {"Code": "ADT", "Quantity": pax.adults},
+        {"Code": "CHD", "Quantity": pax.children},
+        {"Code": "INF", "Quantity": pax.infants}
+      ];
 
       // Build origin-destination array
       var originDest = [{
@@ -504,7 +505,7 @@
 
       // Prepare search payload in exact API format
       var payload = {
-        "Lang": (document.documentElement.lang || "EN").toUpperCase(),
+        "Lang": "FA",
         "TravelPreference": {
           "CabinPref": {
             "Cabin": cabinMap[fclass] || "Economy"
@@ -664,7 +665,7 @@
 
       var searchBtn = root.querySelector('#btnSearchVisa');
       var originalText = searchBtn.innerHTML;
-      searchBtn.innerHTML = '<svg class="tw-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> ' + (T.SearchVisa || 'Search Visa') + '...';
+      searchBtn.innerHTML = '<svg class="tw-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> ' + (T.SearchCIP || 'Search CIP') + '...';
       searchBtn.disabled = true;
 
       var searchData = {

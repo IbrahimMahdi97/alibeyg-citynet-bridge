@@ -45,6 +45,7 @@ class ABG_Citynet_Shortcodes {
      */
     public function register() {
         add_shortcode('alibeyg_travel_widget', array($this, 'render_travel_widget'));
+        add_shortcode('alibeyg_flight_results', array($this, 'render_flight_results'));
     }
 
     /**
@@ -79,6 +80,71 @@ class ABG_Citynet_Shortcodes {
     }
 
     /**
+     * Render flight results shortcode
+     *
+     * @param array $atts Shortcode attributes
+     * @return string Results HTML
+     */
+    public function render_flight_results($atts) {
+        $atts = shortcode_atts(array(
+            'mode' => 'full',  // 'full', 'params-only', or 'silent'
+        ), $atts, 'alibeyg_flight_results');
+
+        // Enqueue the flight results CSS
+        wp_enqueue_style(
+            'abg-citynet-flight-results',
+            $this->plugin_url . '/assets/css/flight-results.css',
+            array(),
+            '0.5.1'
+        );
+
+        // Enqueue the flight results script
+        wp_enqueue_script(
+            'abg-citynet-flight-results',
+            $this->plugin_url . '/assets/js/flight-results.js',
+            array(),
+            '0.5.1',
+            true
+        );
+
+        ob_start();
+
+        // Silent mode: only fetch data, don't display anything
+        if ($atts['mode'] === 'silent') {
+            ?>
+            <!-- Alibeyg Flight Results (Silent Mode) -->
+            <?php
+            return ob_get_clean();
+        }
+
+        // Params-only mode: only show search parameters
+        if ($atts['mode'] === 'params-only') {
+            ?>
+            <div class="alibeyg-flight-results-container">
+                <div id="flight-search-params"></div>
+            </div>
+            <?php
+            return ob_get_clean();
+        }
+
+        // Full mode (default): show everything
+        ?>
+        <div class="alibeyg-flight-results-container">
+            <!-- Search parameters will be displayed here -->
+            <div id="flight-search-params"></div>
+
+            <!-- Flight results will be displayed here -->
+            <div id="flight-results">
+                <div class="loading-state">
+                    <p>Initializing search...</p>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
      * Enqueue assets
      */
     public function enqueue_assets() {
@@ -91,7 +157,7 @@ class ABG_Citynet_Shortcodes {
             'abg-citynet-widget',
             $this->plugin_url . '/assets/css/travel-widget.css',
             array(),
-            '0.5.0'
+            '0.5.1'
         );
 
         // Enqueue JavaScript
@@ -99,7 +165,7 @@ class ABG_Citynet_Shortcodes {
             'abg-citynet-widget',
             $this->plugin_url . '/assets/js/travel-widget.js',
             array(),
-            '0.5.0',
+            '0.5.1',
             true
         );
 
@@ -145,7 +211,6 @@ class ABG_Citynet_Shortcodes {
             'SearchHotels'         => $translate('Search Hotels'),
             'CityOrAirport'        => $translate('City or Airport'),
             'CityHotelPlace'       => $translate('City, Hotel, Place'),
-            'PoweredBy'            => $translate('Powered by Travel Booking Engine'),
             'PleaseFillRequired'   => $translate('Please fill in all required fields'),
             'PleaseSelectReturn'   => $translate('Please select a return date'),
             'Adults'               => $translate('Adults'),
@@ -162,10 +227,9 @@ class ABG_Citynet_Shortcodes {
             'NoResults'            => $translate('No results'),
             'CIP'                  => $translate('CIP'),
             'TravelInsurance'      => $translate('Travel Insurance'),
-            'Visa'                 => $translate('Visa'),
             'Destination_Country'  => $translate('Destination Country'),
             'TravelDuration'       => $translate('Travel Duration'),
-            'SearchVisa'           => $translate('Search Visa'),
+            'SearchCIP'            => $translate('Search CIP'),
             'SearchCountry'        => $translate('Search country...'),
             'SelectCountry'        => $translate('Select destination country'),
             'Persons'              => $translate('Persons'),
